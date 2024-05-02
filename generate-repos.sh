@@ -17,49 +17,24 @@ ask() {
     fi
 }
 
-create_new_repo() {
+assign_repo() {
     group_padded="$(pad_with_zeros "$group")"
-    echo "Creating group $group_padded"
-    repo_name="$repo_prefix$group_padded"
-    repo_path="$tmp_directory/$repo_name"
-    git clone -q "$template_repository" "$repo_path"
-    pushd "$repo_path" > /dev/null
-    source="$replacement_text[0-9]+"
-    destination="$replacement_text$group_padded"
-    replace_in_paths "$source" "$destination"
-    replace_in_content "$source" "$destination"
-    if [[ -n "$(git status --porcelain)" ]]; then
-        # working directory not clean -- something changed
-        git add .
-        git commit -qm "Change package name"
+    repo_name="$(get_repo_name_for_group)"
+    if [[ -z $repo_name ]]; then
+        echo "Skipping group $group_padded"
+        return 0
     fi
-    create_github_repo
+    echo "Assigning group $group_padded"
     add_tutors_team_to_repo
     create_github_repo_team
     add_repo_team_to_repo
     get_users_for_repo_team | add_users_to_repo_team
-    git remote add github "$repo_url"
-    git push -q github HEAD
-    popd > /dev/null
-}
-
-create_github_repo() {
-    response="$(github_request POST "orgs/$target_organization/repos" <<EOF
-        {
-            "name": "$repo_name",
-            "description": "SWA Group $group_padded",
-            "private": true
-        }
-EOF
-)"
-    repo_url="$(jq -r .html_url <<<"$response")"
-    repo_owner="$(jq -r .owner.login <<<"$response")"
 }
 
 add_team_to_repo() {
     team_slug="$1"
     permission="$2"
-    github_request PUT "orgs/$target_organization/teams/$team_slug/repos/$repo_owner/$repo_name" <<EOF
+    github_request PUT "orgs/$target_organization/teams/$team_slug/repos/$target_organization/$repo_name" > /dev/null <<EOF
         {
             "permission": "$permission"
         }
@@ -90,8 +65,12 @@ add_users_to_repo_team() {
     done
 }
 
+get_repo_name_for_group() {
+    awk "NR==$group" "$repos_file"
+}
+
 get_users_for_repo_team() {
-    sed -nr "s/^([^\t]+)\t([^\t]+)\t.*\tGruppe $group_padded\t$/\2 \1/p" $groups_file \
+    sed -nr "s/^([^\t]+)\t([^\t]+)\t.*\tGroup $group_padded\t$/\2 \1/p" $groups_file \
         | while read full_name; do
             path="$(echo "$usernames_directory/${full_name}_"*"/onlinetext.html")"
             if [[ -f $path ]]; then
@@ -109,29 +88,6 @@ get_users_for_repo_team() {
                 echo "Student $full_name from group $group_padded did not submit their GitHub username" > /dev/stderr
             fi
         done
-}
-
-replace_in_paths() {
-    source="$1"
-    destination="$2"
-    while true; do
-        source_path="$(find | grep -P "$source" | head -n 1)"
-        if [[ -z "$source_path" ]]; then
-            break
-        fi
-        destination_path="$(sed -r "s/$source/$destination/g" <<<"$source_path")"
-        if [[ "$source_path" == "$destination_path" ]]; then
-            break
-        fi
-        mv "$source_path" "$destination_path"
-    done
-}
-
-replace_in_content() {
-    source="$1"
-    destination="$2"
-    find . \( -type d -name .git -prune \) -o -type f -print0 \
-        | xargs -0 sed -i -r "s/$source/$destination/g"
 }
 
 pad_with_zeros() {
@@ -156,7 +112,7 @@ github_request() {
 #     cat <<EOF
 #         {
 #             "id": 42,
-#             "slug": "2023-24-swa-group-$group_padded",
+#             "slug": "$current_yyyy-swt-group-$group_padded",
 #             "owner": {
 #                 "login": "owner-username"
 #             }
@@ -164,17 +120,13 @@ github_request() {
 # EOF
 }
 
-current_yy="$(date +%y)"
 current_yyyy="$(date +%Y)"
-next_yy="$((current_yy + 1))"
 
 ask "GitHub organization" target_organization "hpi-swa-teaching"
-ask "Repository prefix" repo_prefix "swa$current_yy-$next_yy-group"
-ask "GitHub groups team prefix" repo_team_prefix "$current_yyyy/$next_yy SWA Group"
-ask "GitHub tutors team slug (name with dashes)" tutors_team_slug "$current_yyyy-$next_yy-swa-tutors"
-ask "Prefix of text to replace" replacement_text "SWAGroup"
+ask "GitHub groups team prefix" repo_team_prefix "$current_yyyy SWT Group"
+ask "GitHub tutors team slug (name with dashes)" tutors_team_slug "$current_yyyy-tutors"
 ask "Group count" group_count
-ask "Path to template repository" template_repository
+ask "Path to repos list file" repos_file
 ask "Path to Moodle groups file" groups_file
 ask "Path to Moodle GitHub usernames directory" usernames_directory
 ask "GitHub token" github_token
@@ -182,6 +134,6 @@ ask "GitHub token" github_token
 tmp_directory="$(mktemp -d)"
 
 for group in $(seq 1 $group_count); do
-    create_new_repo
+    assign_repo
 done
 echo "Done!"
