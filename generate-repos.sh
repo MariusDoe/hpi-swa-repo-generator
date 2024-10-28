@@ -34,10 +34,9 @@ create_new_repo() {
     repo_path="$tmp_directory/$repo_name"
     git clone -q "$template_repository" "$repo_path"
     pushd "$repo_path" > /dev/null
-    source="$replacement_text[0-9]+"
-    destination="$replacement_text$group_padded"
-    replace_in_paths "$source" "$destination"
-    replace_in_content "$source" "$destination"
+    do_replacements "SWAGroup"
+    do_replacements "SWA Group "
+    do_replacements "$repo_prefix"
     if [[ -n "$(git status --porcelain)" ]]; then
         # working directory not clean -- something changed
         git add .
@@ -123,6 +122,13 @@ get_users_for_repo_team() {
                 echo "Student $full_name from group $group_padded did not submit their GitHub username" > /dev/stderr
             fi
         done
+
+do_replacements() {
+    replacement_text="$1"
+    source="$replacement_text[0-9]+"
+    destination="$replacement_text$group_padded"
+    replace_in_paths "$source" "$destination"
+    replace_in_content "$source" "$destination"
 }
 
 replace_in_paths() {
@@ -189,7 +195,6 @@ ask "GitHub organization" target_organization "hpi-swa-teaching"
 ask "Repository prefix" repo_prefix "swa$current_yy-$next_yy-group"
 ask "GitHub groups team prefix" repo_team_prefix "$current_yyyy/$next_yy SWA Group"
 ask "GitHub tutors team slug (name with dashes)" tutors_team_slug "$current_yyyy-$next_yy-swa-tutors"
-ask "Prefix of text to replace" replacement_text "SWAGroup"
 ask "Group count" group_count
 ask_path "Path to template repository" template_repository
 ask_path "Path to Moodle groups file" groups_file
