@@ -21,6 +21,12 @@ ask() {
     fi
 }
 
+ask_path() {
+    reply="$2"
+    ask "$@"
+    declare -g $reply="$(realpath "${!reply}")"
+}
+
 create_new_repo() {
     group_padded="$(pad_with_zeros "$group")"
     echo "Creating group $group_padded"
@@ -185,9 +191,9 @@ ask "GitHub groups team prefix" repo_team_prefix "$current_yyyy/$next_yy SWA Gro
 ask "GitHub tutors team slug (name with dashes)" tutors_team_slug "$current_yyyy-$next_yy-swa-tutors"
 ask "Prefix of text to replace" replacement_text "SWAGroup"
 ask "Group count" group_count
-ask "Path to template repository" template_repository
-ask "Path to Moodle groups file" groups_file
-ask "Path to Moodle GitHub usernames directory" usernames_directory
+ask_path "Path to template repository" template_repository
+ask_path "Path to Moodle groups file" groups_file
+ask_path "Path to Moodle GitHub usernames directory" usernames_directory
 ask "GitHub token" github_token
 
 tmp_directory="$(mktemp -d)"
