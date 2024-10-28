@@ -29,6 +29,10 @@ ask_path() {
 
 create_new_repo() {
     group_padded="$(pad_with_zeros "$group")"
+    if [[ -z $(get_full_names_for_repo_team) ]]; then
+        echo "Skipping empty group $group_padded"
+        return
+    fi
     echo "Creating group $group_padded"
     repo_name="$repo_prefix$group_padded"
     repo_path="$tmp_directory/$repo_name"
@@ -103,25 +107,29 @@ add_users_to_repo_team() {
     done
 }
 
+get_full_names_for_repo_team() {
+    sed -nr "s/^([^\t]+)\t([^\t]+)\t.*\tGruppe $group_padded\t$/\2 \1/p" $groups_file
+}
+
 get_users_for_repo_team() {
-    sed -nr "s/^([^\t]+)\t([^\t]+)\t.*\tGruppe $group_padded\t$/\2 \1/p" $groups_file \
-        | while read full_name; do
-            path="$(echo "$usernames_directory/${full_name}_"*"/onlinetext.html")"
-            if [[ -f $path ]]; then
-                submission="$(lynx --dump "$path" | xargs)" # xargs to trim
-                regular_name_regex='^@?[a-zA-Z0-9-]+$'
-                github_url_regex='^https://github\.com/[a-zA-Z0-9-]+$'
-                if [[ "$submission" =~ $regular_name_regex ]]; then
-                    echo "${submission#@}"
-                elif [[ "$submission" =~ $github_url_regex ]]; then
-                    echo "${submission#https://github.com/}"
-                else
-                    echo "Student $full_name from group $group_padded submitted an unparsable GitHub username: $submission" > /dev/stderr
-                fi
+    get_full_names_for_repo_team | while read full_name; do
+        path="$(echo "$usernames_directory/${full_name}_"*"/onlinetext.html")"
+        if [[ -f $path ]]; then
+            submission="$(lynx --dump "$path" | xargs)" # xargs to trim
+            regular_name_regex='^@?[a-zA-Z0-9-]+$'
+            github_url_regex='^https://github\.com/[a-zA-Z0-9-]+$'
+            if [[ "$submission" =~ $regular_name_regex ]]; then
+                echo "${submission#@}"
+            elif [[ "$submission" =~ $github_url_regex ]]; then
+                echo "${submission#https://github.com/}"
             else
-                echo "Student $full_name from group $group_padded did not submit their GitHub username" > /dev/stderr
+                echo "Student $full_name from group $group_padded submitted an unparsable GitHub username: $submission" > /dev/stderr
             fi
-        done
+        else
+            echo "Student $full_name from group $group_padded did not submit their GitHub username" > /dev/stderr
+        fi
+    done
+}
 
 do_replacements() {
     replacement_text="$1"
