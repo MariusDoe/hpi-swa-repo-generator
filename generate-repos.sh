@@ -31,7 +31,7 @@ create_new_repo() {
     if [[ -n "$(git status --porcelain)" ]]; then
         # working directory not clean -- something changed
         git add .
-        git commit -qm "Change package name"
+        git commit --amend --no-edit -q
     fi
     create_github_repo
     add_tutors_team_to_repo
