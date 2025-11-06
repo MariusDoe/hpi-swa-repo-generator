@@ -3,7 +3,7 @@
 set -e
 
 is_dry_run() {
-    return 0
+    false
 }
 
 ask() {
@@ -53,9 +53,9 @@ create_new_repo() {
     get_users_for_repo_team | add_users_to_repo_team
     git remote add github "$repo_url"
     if is_dry_run; then
-        git push -q github HEAD
-    else
         echo Pushing to "$repo_url"
+    else
+        git push -q github HEAD
     fi
     popd > /dev/null
 }
@@ -172,14 +172,6 @@ github_request() {
     request_type="$1"
     api_path="$2"
     if is_dry_run; then
-        curl --no-progress-meter --location \
-            --request "$request_type" \
-            --url "https://api.github.com/$api_path" \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $github_token" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            --data @-
-    else
         echo "$request_type $api_path" > /dev/stderr
         cat > /dev/stderr
         cat <<EOF
@@ -192,6 +184,14 @@ github_request() {
                 }
             }
 EOF
+    else
+        curl --no-progress-meter --location \
+            --request "$request_type" \
+            --url "https://api.github.com/$api_path" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $github_token" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data @-
     fi
 }
 
