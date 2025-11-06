@@ -32,7 +32,11 @@ From these inputs, it
 
 ## Running
 
-Just execute the script without arguments, it will ask for what it needs.
+Prior to running the script:
+- it is recommended to configure `git` to remember your credentials, since `git push` will be executed multiple times
+- you need to create the GitHub team for tutors 
+
+Then, just execute the script without arguments, it will ask for what it needs.
 
 Some prompts will have default values:
 
