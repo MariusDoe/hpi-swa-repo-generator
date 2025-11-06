@@ -5,8 +5,9 @@ Generates repositories for the SWA lecture at HPI.
 It takes as input
 - template repository
 - a file from Moodle containing group info
+  - on the Moodle task for the group choice, click _View N responses_ and then _Download in text format_
 - a directory from Moodle containing GitHub username info
- (the .zip provided by Moodle when downloading all submissions)
+  - on the Moodle task for the username, click _View all submissions_ and then _Download all submissions_, finally unzip the downloaded file
 - a GitHub token with access to the `repo` and `admin:org` scopes
 
 From these inputs, it
