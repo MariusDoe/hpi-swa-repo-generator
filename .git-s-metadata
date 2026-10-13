@@ -1,0 +1,22 @@
+GSMetadata {
+	#version : 1,
+	#mappers : OrderedCollection [
+		GSTonelMapper {
+			#version : 1,
+			#package : MCPackage {
+				#name : 'SWARepoGenerator'
+			},
+			#path : FSAbsolutePath [
+				'src'
+			]
+		},
+		GSTonelMapper {
+			#version : 1,
+			#package : MCPackage {
+				#name : 'BaselineOfSWARepoGenerator'
+			},
+			#path : @5
+		}
+	],
+	#name : 'SWARepoGenerator'
+}
