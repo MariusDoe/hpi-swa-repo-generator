@@ -51,12 +51,12 @@ SRGGitLabProject class >> randomOn: aGitLab [
 
 {
 	#category : #members,
-	#'squeak_changestamp' : 'mad 10/11/2026 21:38'
+	#'squeak_changestamp' : 'mad 10/20/2026 18:14'
 }
-SRGGitLabProject >> addMember: usernameString role: roleNumber onError: aBlock [
+SRGGitLabProject >> addMember: emailString role: roleNumber onError: aBlock [
 	self gitLab
-		post: ('projects/{1}/members' format: {self id})
-		body: {'username' -> usernameString. 'access_level' -> roleNumber}
+		post: ('projects/{1}/invitations' format: {self id})
+		body: {'email' -> emailString. 'access_level' -> roleNumber}
 		onDryRun: []
 		onError: aBlock.
 ]

@@ -22,12 +22,12 @@ SRGStudentGroup class >> students: aCollection in: aRepoGenerator [
 
 {
 	#category : #gitlab,
-	#'squeak_changestamp' : 'mad 10/11/2026 21:45'
+	#'squeak_changestamp' : 'mad 10/21/2026 13:18'
 }
 SRGStudentGroup >> addMember: aStudent [
 	aStudent gitLabName ifNil: [^ self logError: ('student {1} ({2}) has not GitLab name' format: {aStudent. self})].
 	(self gitLabProject ifNil: [^ self logError: ('skipping adding {1} to {2}' format: {aStudent. self})])
-		addMember: aStudent gitLabName
+		addMember: aStudent email
 		role: SRGGitLab developerRole
 		onError: [^ self logError: ('could not add {1} to {2}' format: {aStudent. self})].
 ]
