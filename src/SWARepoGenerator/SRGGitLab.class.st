@@ -52,13 +52,16 @@ SRGGitLab >> apiUrl: aString [
 
 {
 	#category : #groups,
-	#'squeak_changestamp' : 'mad 10/11/2026 00:18'
+	#'squeak_changestamp' : 'mad 10/20/2026 17:05'
 }
 SRGGitLab >> createGroup [
-	| groupName parentGroup |
+	| groupName groupPath parentGroup |
 	groupName := Project uiManager request: 'Group name:'.
+	groupPath := Project uiManager
+		request: 'Path for group:'
+		initialAnswer: (groupName asLowercase copyWithRegex: '[^-a-zA-Z0-9]' matchesReplacedWith: '-').
 	parentGroup := self requestGroup: 'Parent group:'.
-	^ self createGroup: groupName in: parentGroup
+	^ self createGroup: groupName path: groupPath in: parentGroup
 ]
 
 {
@@ -68,6 +71,23 @@ SRGGitLab >> createGroup [
 SRGGitLab >> createGroup: nameString in: parentGroup [
 	| body |
 	body := {'name' -> nameString}.
+	parentGroup ifNotNil: [body := body copyWith: 'parent_id' -> parentGroup id].
+	^ SRGGitLabGroup
+		fromResponse: (self
+			post: 'groups'
+			body: body
+			onDryRun: [^ SRGGitLabGroup randomOn: self]
+			onError: [self logError: ('could not create group {1}' format: {nameString}). ^ nil])
+		on: self
+]
+
+{
+	#category : #groups,
+	#'squeak_changestamp' : 'mad 10/20/2026 16:51'
+}
+SRGGitLab >> createGroup: nameString path: pathString in: parentGroup [
+	| body |
+	body := {'name' -> nameString. 'path' -> pathString}.
 	parentGroup ifNotNil: [body := body copyWith: 'parent_id' -> parentGroup id].
 	^ SRGGitLabGroup
 		fromResponse: (self
