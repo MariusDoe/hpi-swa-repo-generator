@@ -317,11 +317,13 @@ SRGRepoGenerator >> selectSemesterGitLabGroup [
 
 {
 	#category : #accessing,
-	#'squeak_changestamp' : 'mad 10/13/2026 15:37'
+	#'squeak_changestamp' : 'mad 10/21/2026 12:21'
 }
 SRGRepoGenerator >> selectTutors [
 	| potentialTutors |
-	potentialTutors := (self students ifNil: [^ nil]) select: [:each | each groupNumber isNil and: [each isAtHPI]].
+	potentialTutors := ((self students ifNil: [^ nil])
+		select: [:each | each groupNumber isNil and: [each isAtHPI]])
+		sorted: #printString ascending.
 	^ Project uiManager
 		chooseMultipleFrom: potentialTutors
 		values: potentialTutors
@@ -330,13 +332,14 @@ SRGRepoGenerator >> selectTutors [
 
 {
 	#category : #repository,
-	#'squeak_changestamp' : 'mad 10/11/2026 00:18'
+	#'squeak_changestamp' : 'mad 10/21/2026 13:49'
 }
 SRGRepoGenerator >> selectWorkingCopy [
-	| workingCopyName |
+	| names workingCopyName |
+	names := GSGitWorkingCopy registeredNames sorted.
 	workingCopyName := Project uiManager
-		chooseFrom: (GSGitWorkingCopy registeredNames copyWith: 'Clone new')
-		values: (GSGitWorkingCopy registeredNames copyWith: #clone)
+		chooseFrom: (names copyWith: 'Clone new')
+		values: (names copyWith: #clone)
 		title: 'Template repository:'.
 	workingCopyName ifNil: [^ self].
 	self workingCopy:

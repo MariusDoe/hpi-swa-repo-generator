@@ -215,11 +215,11 @@ SRGGitLab >> post: apiRouteString body: aJsonObject onDryRun: dryRunBlock onErro
 
 {
 	#category : #groups,
-	#'squeak_changestamp' : 'mad 10/11/2026 00:18'
+	#'squeak_changestamp' : 'mad 10/21/2026 12:22'
 }
 SRGGitLab >> requestGroup: titleString [
 	| groups result |
-	groups := self groups ifNil: [^ nil].
+	groups := (self groups ifNil: [^ nil]) sorted: #name ascending.
 	result := Project uiManager
 		chooseFrom: ((groups collect: #name) copyWith: 'Create new')
 		values: (groups copyWith: #new)
