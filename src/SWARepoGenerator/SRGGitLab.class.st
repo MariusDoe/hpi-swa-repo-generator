@@ -113,6 +113,21 @@ SRGGitLab >> createProject: nameString in: parentGroup [
 ]
 
 {
+	#category : #api,
+	#'squeak_changestamp' : 'mad 10/21/2026 12:32'
+}
+SRGGitLab >> delete: apiRouteString onDryRun: dryRunBlock onError: errorBlock [
+	self dryRun ifTrue: [
+		self logError: ('dry run: running DELETE {1}' format: {apiRouteString}).
+		^ dryRunBlock value].
+	^ self
+		handleResponse: (WebClient new
+			httpDelete: (self apiUrl: apiRouteString)
+			do: [:request | self addTokenTo: request])
+		onError: errorBlock
+]
+
+{
 	#category : #accessing,
 	#'squeak_changestamp' : 'mad 10/10/2026 20:04'
 }

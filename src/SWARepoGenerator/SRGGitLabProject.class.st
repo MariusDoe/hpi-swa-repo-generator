@@ -118,6 +118,17 @@ SRGGitLabProject >> printOn: aStream [
 ]
 
 {
+	#category : #branches,
+	#'squeak_changestamp' : 'mad 10/20/2026 18:27'
+}
+SRGGitLabProject >> unprotectBranch: nameString onError: aBlock [
+	self gitLab
+		delete: ('projects/{1}/protected_branches/{2}' format: {self id. nameString})
+		onDryRun: []
+		onError: aBlock.
+]
+
+{
 	#category : #accessing,
 	#'squeak_changestamp' : 'mad 10/10/2026 19:38'
 }

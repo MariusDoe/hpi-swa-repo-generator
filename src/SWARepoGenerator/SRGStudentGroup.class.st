@@ -43,11 +43,12 @@ SRGStudentGroup >> addMembers [
 
 {
 	#category : #gitlab,
-	#'squeak_changestamp' : 'mad 10/11/2026 21:46'
+	#'squeak_changestamp' : 'mad 10/20/2026 18:30'
 }
 SRGStudentGroup >> createSwaGitLabProject [
 	self generator semesterGitLabGroup ifNil: [^ self logError: ('skipping creating SWA gitlab project for {1}, no semester group' format: {self})].
 	self gitLabProject: (self gitLab createProject: self swaProjectName in: self generator semesterGitLabGroup).
+	self gitLabProject unprotectBranch: 'main' onError: [].
 ]
 
 {
