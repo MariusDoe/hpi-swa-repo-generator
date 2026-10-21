@@ -292,19 +292,18 @@ SRGRepoGenerator >> reset [
 
 {
 	#category : #running,
-	#'squeak_changestamp' : 'mad 10/13/2026 15:41'
+	#'squeak_changestamp' : 'mad 10/21/2026 12:36'
 }
 SRGRepoGenerator >> runForSwa [
-	self
+	[self
 		dryRunFromUser;
 		studentsFromRequestedFile;
 		selectWorkingCopy;
 		gitLabTokenFromUser;
 		selectSemesterGitLabGroup;
 		addTutorsToSemesterGitLabGroup;
-		handleStudentGroupsForSwa;
-		reset;
-		showLogs.
+		handleStudentGroupsForSwa]
+			ensure: [self reset; showLogs].
 ]
 
 {
