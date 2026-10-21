@@ -246,8 +246,8 @@ SRGGitLab >> token: aString [
 
 {
 	#category : #token,
-	#'squeak_changestamp' : 'mad 10/11/2026 00:18'
+	#'squeak_changestamp' : 'mad 10/21/2026 13:22'
 }
 SRGGitLab >> tokenFromUser [
-	self token: (Project uiManager request: 'GitLab token:').
+	self token: (Project uiManager requestPassword: 'GitLab token:').
 ]
