@@ -317,17 +317,20 @@ SRGRepoGenerator >> selectSemesterGitLabGroup [
 
 {
 	#category : #accessing,
-	#'squeak_changestamp' : 'mad 10/21/2026 12:21'
+	#'squeak_changestamp' : 'mad 10/21/2026 12:38'
 }
 SRGRepoGenerator >> selectTutors [
-	| potentialTutors |
+	| potentialTutors tutors |
 	potentialTutors := ((self students ifNil: [^ nil])
 		select: [:each | each groupNumber isNil and: [each isAtHPI]])
 		sorted: #printString ascending.
-	^ Project uiManager
+	tutors := (Project uiManager
 		chooseMultipleFrom: potentialTutors
 		values: potentialTutors
-		title: 'Select tutors:'
+		title: 'Select tutors:') ifNil: [^ nil].
+	(potentialTutors copyWithoutAll: tutors) do: [:each |
+		self logError: ('warning: {1} is neither a student in a group nor a tutor' format: {each})].
+	^ tutors
 ]
 
 {
