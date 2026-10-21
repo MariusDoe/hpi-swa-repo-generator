@@ -368,11 +368,11 @@ SRGRepoGenerator >> semesterGitLabGroup: aGitLabGroup [
 
 {
 	#category : #running,
-	#'squeak_changestamp' : 'mad 10/13/2026 15:41'
+	#'squeak_changestamp' : 'mad 10/21/2026 12:31'
 }
 SRGRepoGenerator >> showLogs [
-	self inform: ((#('Logs from the run:'), (self log collect: [:each | '* ', each]))
-					joinSeparatedBy: String cr).
+	((self log collect: [:each | '* ', each]) joinSeparatedBy: String cr)
+		editWithLabel: 'Logs from the run:'.
 ]
 
 {
