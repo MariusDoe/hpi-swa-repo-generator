@@ -241,12 +241,16 @@ SRGRepoGenerator >> pushTo: urlString [
 
 {
 	#category : #repository,
-	#'squeak_changestamp' : 'mad 10/10/2026 23:53'
+	#'squeak_changestamp' : 'mad 10/21/2026 13:46'
 }
 SRGRepoGenerator >> renameClassCategory: oldString to: newString [
-	self environment organization categories
-		select: [:each | each = oldString or: [each beginsWith: oldString, '-']]
-		thenDo: [:each | self environment organization renameCategory: each toBe: newString, (each allButFirst: oldString size)].
+	((self environment organization categories
+		select: [:each | each = oldString or: [each beginsWith: oldString, '-']])
+		sorted: #size descending) "sub-categories first, otherwise rename will be a no-op"
+		do: [:each | | newName |
+			newName := newString, (each allButFirst: oldString size).
+			self assert: (self environment organization categories includes: newName) not.
+			self environment organization renameCategory: each toBe: newName].
 ]
 
 {
